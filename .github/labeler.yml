@@ -1,0 +1,19 @@
+ci:
+  - .github/**/*
+
+dependencies:
+  - setup/**/*
+
+documentation:
+  - docs/**/*
+  - README.md
+  - LICENSE
+  - CHANGELOG.md
+  - CODE-OF-CONDUCT.md
+  - CODE_OF_CONDUCT.md
+  - CONTRIBUTION.md
+  - SECURITY.md
+
+# Library
+core:
+  - kotlin-result/**/*
