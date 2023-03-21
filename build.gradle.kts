@@ -3,6 +3,8 @@ import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
+import tech.antibytes.gradle.dependency.helper.ensureKotlinVersion
+import tech.antibytes.gradle.result.config.publishing.ProjectPublishingConfiguration
 
 val ossrhUsername: String? by project
 val ossrhPassword: String? by project
@@ -15,12 +17,23 @@ description = "A Result monad for modelling success or failure operations."
 
 plugins {
     base
+    id("tech.antibytes.gradle.setup")
+    alias(antibytesCatalog.plugins.gradle.antibytes.dependencyHelper)
+    alias(antibytesCatalog.plugins.gradle.antibytes.publishing)
+
     alias(libs.plugins.versions)
 
     alias(libs.plugins.multiplatform) apply false
     alias(libs.plugins.benchmark) apply false
     alias(libs.plugins.dokka) apply false
-    alias(libs.plugins.allOpen) apply false
+}
+
+val publishing = ProjectPublishingConfiguration(project)
+
+antibytesPublishing {
+    additionalPublishingTasks.set(publishing.additionalPublishingTasks)
+    versioning.set(publishing.versioning)
+    repositories.set(publishing.repositories)
 }
 
 tasks.withType<DependencyUpdatesTask> {
@@ -37,6 +50,7 @@ allprojects {
     repositories {
         mavenCentral()
     }
+    ensureKotlinVersion("1.7.10")
 }
 
 subprojects {
@@ -63,187 +77,6 @@ subprojects {
 
             configure<KotlinMultiplatformExtension> {
                 explicitApi()
-
-                jvm {
-                    mavenPublication {
-                        artifact(javadocJar.get())
-                    }
-                }
-
-                js(IR) {
-                    browser()
-                    nodejs()
-                }
-
-                linuxX64()
-
-                mingwX64()
-
-                macosX64()
-                macosArm64()
-
-                ios()
-                iosArm32()
-                iosSimulatorArm64()
-
-                tvos()
-                tvosSimulatorArm64()
-
-                watchos()
-                watchosX86()
-                watchosSimulatorArm64()
-            }
-        }
-
-        configure<PublishingExtension> {
-            repositories {
-                maven {
-                    if (project.version.toString().endsWith("SNAPSHOT")) {
-                        setUrl("https://oss.sonatype.org/content/repositories/snapshots")
-                    } else {
-                        setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                    }
-
-                    credentials {
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
-            }
-
-            publications.withType<MavenPublication> {
-                pom {
-                    name.set(project.name)
-                    url.set("https://github.com/michaelbull/kotlin-result")
-                    inceptionYear.set("2017")
-
-                    licenses {
-                        license {
-                            name.set("ISC License")
-                            url.set("https://opensource.org/licenses/isc-license.txt")
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            name.set("Michael Bull")
-                            url.set("https://www.michael-bull.com")
-                        }
-                    }
-
-                    contributors {
-                        contributor {
-                            name.set("Kevin Herron")
-                            url.set("https://github.com/kevinherron")
-                        }
-
-                        contributor {
-                            name.set("Markus Padourek")
-                            url.set("https://github.com/Globegitter")
-                        }
-
-                        contributor {
-                            name.set("Tristan Hamilton")
-                            url.set("https://github.com/Munzey")
-                        }
-
-                        contributor {
-                            name.set("Joseph Van der Wee")
-                            url.set("https://github.com/jvanderwee")
-                        }
-
-                        contributor {
-                            name.set("Gregory Inouye")
-                            url.set("https://github.com/gregoryinouye")
-                        }
-
-                        contributor {
-                            name.set("Thomas Oddsund")
-                            url.set("https://github.com/oddsund")
-                        }
-
-                        contributor {
-                            name.set("Jan Müller")
-                            url.set("https://github.com/DerYeger")
-                        }
-
-                        contributor {
-                            name.set("avently")
-                            url.set("https://github.com/avently")
-                        }
-
-                        contributor {
-                            name.set("gsteckman")
-                            url.set("https://github.com/gsteckman")
-                        }
-
-                        contributor {
-                            name.set("Mathias Guelton")
-                            url.set("https://github.com/mguelton")
-                        }
-
-                        contributor {
-                            name.set("Jordan Bergin")
-                            url.set("https://github.com/MrBergin")
-                        }
-
-                        contributor {
-                            name.set("Pablo Gonzalez Alonso")
-                            url.set("https://pablisco.com/")
-                        }
-
-                        contributor {
-                            name.set("Joseph Cooper")
-                            url.set("https://grodin.github.io/")
-                        }
-
-                        contributor {
-                            name.set("Sebastian Kappen")
-                            url.set("https://github.com/Nimelrian")
-                        }
-
-                        contributor {
-                            name.set("Dmitry Suzdalev")
-                            url.set("https://github.com/dimsuz")
-                        }
-
-                        contributor {
-                            name.set("Berik Visschers")
-                            url.set("https://visschers.nu/")
-                        }
-
-                        contributor {
-                            name.set("Matthew Nelson")
-                            url.set("https://matthewnelson.io/")
-                        }
-
-                        contributor {
-                            name.set("Matthias Geisler")
-                            url.set("https://github.com/bitPogo")
-                        }
-                    }
-
-                    scm {
-                        connection.set("scm:git:https://github.com/michaelbull/kotlin-result")
-                        developerConnection.set("scm:git:git@github.com:michaelbull/kotlin-result.git")
-                        url.set("https://github.com/michaelbull/kotlin-result")
-                    }
-
-                    issueManagement {
-                        system.set("GitHub")
-                        url.set("https://github.com/michaelbull/kotlin-result/issues")
-                    }
-
-                    ciManagement {
-                        system.set("GitHub")
-                        url.set("https://github.com/michaelbull/kotlin-result/actions?query=workflow%3Aci")
-                    }
-                }
-            }
-
-            configure<SigningExtension> {
-                useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-                sign(publications)
             }
         }
     }
